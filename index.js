@@ -88,7 +88,7 @@ async function run() {
 
     // Flash Sale product api
 
-    app.post("/api/v1/flash-sale-products", async (req, res) => {
+    app.post("/api/v1/create-flash-sale-products", async (req, res) => {
       const bodyData = req.body;
       const body = { ...bodyData, createdAt: new Date() };
       const result = await flashSaleProducts.insertOne(body);
