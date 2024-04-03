@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 
@@ -98,9 +98,10 @@ async function run() {
         data: result,
       });
     });
+
     app.get("/api/v1/get-flash-sale-products", async (req, res) => {
       const result = await flashSaleProducts
-        .find({})
+        .find({ flashSale: true })
         .sort({ createdAt: -1 })
         .toArray();
       if (result) {
@@ -113,6 +114,83 @@ async function run() {
         res.status(201).json({
           success: false,
           message: "Something Went Wrong",
+        });
+      }
+    });
+    app.get("/api/v1/get-flash-sale-products/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await flashSaleProducts.findOne({ _id: new ObjectId(id) });
+      if (result) {
+        res.status(201).json({
+          success: true,
+          message: "Product retrieved successfully",
+          data: result,
+        });
+      } else {
+        res.status(201).json({
+          success: false,
+          message: "Something Went Wrong",
+        });
+      }
+    });
+
+    // Trending Products
+    app.get("/api/v1/get-trending-products", async (req, res) => {
+      try {
+        const trendingProducts = await flashSaleProducts
+          .find({})
+          .sort({ ratings: -1 })
+          .toArray();
+        if (trendingProducts) {
+          res.status(200).json({
+            success: true,
+            message: "Trending products retrieved successfully",
+            data: trendingProducts,
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "Trending products d'nt found",
+            data: null,
+          });
+        }
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: "Internal server error",
+        });
+      }
+    });
+
+    app.get("/api/v1/all-product", async (req, res) => {
+      console.log(req.query);
+      const { category } = req.query;
+      let query = {};
+      if (category == "undefined") {
+        query = {};
+      } else {
+        query.category = category;
+      }
+      console.log(query);
+      try {
+        const allProducts = await flashSaleProducts.find(query).toArray();
+        if (allProducts) {
+          res.status(200).json({
+            success: true,
+            message: "all products retrieved successfully",
+            data: allProducts,
+          });
+        } else {
+          res.status(404).json({
+            success: false,
+            message: "all products d'nt found",
+            data: null,
+          });
+        }
+      } catch (error) {
+        res.status(500).json({
+          success: false,
+          message: "Internal server error",
         });
       }
     });
