@@ -99,6 +99,21 @@ async function run() {
       });
     });
 
+    app.get("/api/v1/get-all-products", async (req, res) => {
+      const result = await flashSaleProducts.find({}).toArray();
+      if (result) {
+        res.status(201).json({
+          success: true,
+          message: "Product retrieved successfully",
+          data: result,
+        });
+      } else {
+        res.status(201).json({
+          success: false,
+          message: "Something Went Wrong",
+        });
+      }
+    });
     app.get("/api/v1/get-flash-sale-products", async (req, res) => {
       const result = await flashSaleProducts
         .find({ flashSale: true })
@@ -163,7 +178,6 @@ async function run() {
     });
 
     app.get("/api/v1/all-product", async (req, res) => {
-      console.log(req.query);
       const { category } = req.query;
       let query = {};
       if (category == "undefined") {
